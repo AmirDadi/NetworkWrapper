@@ -16,6 +16,9 @@ int main(){
 		else{
 			for(int i=0; i<master_socket.clients_size(); i++){
 				int sd = master_socket.get_client_socket(i);	
+				string read_data = master_socket.read(sd);
+				cout << read_data << endl;
+				master_socket.send(sd, read_data);
 			}
 		}
 	}
