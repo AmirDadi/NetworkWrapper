@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 #include <stdlib.h>
+
+#include "NetworkExceptions.h"
 #define NEW_CONNECTION 0
 #define NEW_MESSAGE 1
 #define MAX_BUFFER_SIZE 1024
@@ -29,12 +31,14 @@ class Socket{
 public:
 	Socket(int multiple_connection = 1);
 	void bind(int port);
-	void listen(int queue, int max_number_of_clients);
-	Message select();
+	void listen(int queue);
+	Message* select();
 	int send(int , std::string data);
 	std::string read(int );
-	int clients_size() { return for(int i=0; i<clients_socket.size(); i++) if(clients_socket[i]==0) return i; } 
+	int clients_size() { return clients_socket.size();} 
 	int get_client_socket(int i) { return clients_socket[i]; }
+	bool has_incoming_message_on(int sd) { return FD_ISSET(sd, &fds); } 
+	void disconnect_client(int i); 
 private:
 	void allow_multiple_connection(int opt=true);
 	struct sockaddr_in address;

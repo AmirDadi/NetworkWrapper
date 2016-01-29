@@ -4,21 +4,35 @@
 using namespace std;
 
 int main(){
-	Socket master_socket;
-	master_socket.bind(8888);
-	master_socket.listen(3, 30);
+	Socket server;
+	server.bind(8888);
+	server.listen(3);
+	Message *msg;
 	while(true){
-		Message msg = master_socket.select();
-		if(msg.get_type() == NEW_CONNECTION){
-			cout << "New Connection" << endl;
-			master_socket.send(msg.get_sender(), "hello");
+		try{
+			msg = server.select();
+		}catch(NetworkException e){
+			cout << "selecting...  " << e.what() << endl;
+		}
+		if(msg->get_type() == NEW_CONNECTION){
+			cout << "New Connection " << msg->get_sender() << endl;
+			server.send(msg->get_sender(), "hello\n");
+			cout << "Welcoming Message Send!" << endl;
 		}
 		else{
-			for(int i=0; i<master_socket.clients_size(); i++){
-				int sd = master_socket.get_client_socket(i);	
-				string read_data = master_socket.read(sd);
-				cout << read_data << endl;
-				master_socket.send(sd, read_data);
+			for(int i=0; i<server.clients_size(); i++){
+				int client_socket = server.get_client_socket(i);
+				try{
+					if(server.has_incoming_message_on(client_socket)){
+						string read_data = server.read(client_socket);
+						cout << "new data from: " <<  client_socket  << " " << read_data << endl;
+						server.send(client_socket, read_data); //echo message
+					}
+				}
+				catch(NetworkException e){
+					cout <<  client_socket << " Disconnecting..." << endl;
+					server.disconnect_client(i--);
+				}
 			}
 		}
 	}
