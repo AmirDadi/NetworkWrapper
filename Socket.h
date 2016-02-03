@@ -18,6 +18,7 @@
 #define NEW_CONNECTION 0
 #define NEW_MESSAGE 1
 #define MAX_BUFFER_SIZE 1024
+
 class Message{
 public:
 	Message(int sender, int type) : sender_id(sender), type(type) {}
@@ -27,6 +28,7 @@ private:
 	int sender_id;
 	int type;
 };
+
 class Socket{
 public:
 	Socket(int multiple_connection = 1);
@@ -39,6 +41,7 @@ public:
 	int get_client_socket(int i) { return clients_socket[i]; }
 	bool has_incoming_message_on(int sd) { return FD_ISSET(sd, &fds); } 
 	void disconnect_client(int i); 
+	~Socket();
 private:
 	void allow_multiple_connection(int opt=true);
 	struct sockaddr_in address;

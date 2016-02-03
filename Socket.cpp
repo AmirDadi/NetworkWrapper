@@ -5,18 +5,10 @@ using namespace std;
 Socket::Socket(int multiple_connection){
     int socket_fd;
     if( (fd = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
-		throw NetworkException("Socket Creation");
+		throw SocketCreateException(string(strerror(errno)));
     }
     allow_multiple_connection(multiple_connection);
 }
-
-void Socket::allow_multiple_connection(int opt){
-    //set master socket to allow multiple connections , this is just a good habit, it will work without this
-    if( setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 ){
-		throw NetworkException("Multiple Socket");
-    }
-}
-
 
 void Socket::bind(int port){
     //type of socket created
@@ -25,14 +17,20 @@ void Socket::bind(int port){
     address.sin_port = htons( port );
       
     if (::bind(fd, (struct sockaddr *)&address, sizeof(address))<0) {
-		throw NetworkException("Bind");
+		throw BindingException(string(strerror(errno)));
     }
-    printf("Listener on port %d \n", port);
+}
+
+void Socket::allow_multiple_connection(int opt){
+    //set master socket to allow multiple connections , this is just a good habit, it will work without this
+    if( setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 ){
+		throw NetworkException(string(strerror(errno)));
+    }
 }
 
 void Socket::listen(int queue){
 	if (::listen(fd, queue) < 0){
-		throw NetworkException("Listen");
+		throw ListeningException(string(strerror(errno)));
 	}
 }
 
@@ -58,13 +56,13 @@ Message* Socket::select(){
 	int activity = ::select( max_sd + 1 , &fds , NULL , NULL , NULL);
 	
 	if ((activity < 0) && (errno!=EINTR)) {
-		throw NetworkException("Select");
+		throw SelectingException(string(strerror(errno)));
 	}
 	int new_socket;
 	int addrlen = sizeof(address);
 	if (FD_ISSET(fd, &fds)){ 
 		if ((new_socket = accept(fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0){
-			throw NetworkException("Accept");
+			throw NetworkException(string(strerror(errno))); 
 		}
 		clients_socket.push_back(new_socket);
 		return new Message(new_socket, NEW_CONNECTION);
@@ -89,4 +87,8 @@ int Socket::send(int sd, string message){
 void Socket::disconnect_client(int i){
 	close(clients_socket[i]);
 	clients_socket.erase(clients_socket.begin() + i);
+}
+
+Socket::~Socket(){
+	close(fd);
 }
