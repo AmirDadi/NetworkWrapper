@@ -17,7 +17,7 @@
 #include "NetworkExceptions.h"
 #define NEW_CONNECTION 0
 #define NEW_MESSAGE 1
-#define MAX_BUFFER_SIZE 1024
+#define MAX_BUFFER_SIZE 2048
 
 class Message{
 public:
