@@ -5,8 +5,8 @@ client: Client.o client_main.cpp
 	g++ -std=c++11 client_main.cpp Client.o
 Client.o: Client.cpp
 	g++ -std=c++11 -c Client.cpp
-ServerSocket.o: ServerSocket.cpp 
- 	g++ -std=c++11 -c ServerSocket.cpp 
+ServerSocket.o: ServerSocket.cpp
+	g++ -std=c++11  -c ServerSocket.cpp
 Socket.o: Socket.cpp
 	g++ -std=c++11 -c Socket.cpp
 
