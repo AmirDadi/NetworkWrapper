@@ -1,10 +1,11 @@
 #include "ServerSocket.h"
-
+#include <thread>
 using namespace std;
 
 ServerSocket::ServerSocket(int port) : Socket(){
 	bind(port);
 	listen(3);
+	thread* input = new thread(&ServerSocket::get_input, this);
 }
 
 
